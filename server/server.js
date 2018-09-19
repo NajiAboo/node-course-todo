@@ -1,30 +1,26 @@
 
-const mongoose = require('mongoose');
+const express = require('express')
+const bodyParser = require('body-parser');
+const {mongoose} = require('./db/mongoose');
 
-var todoOps = require('../models/todo');
-
-const url ='mongodb+srv://najiaboo:asasas(9@cluster0-pgdnv.mongodb.net/TodoApp?retryWrites=true';
-mongoose.Promise = global.Promise;
-mongoose.connect(url,{ useNewUrlParser: true });
+var todoOps = require('./models/todo');
+var userOps = require('./models/user');
 
 
-var todoModel = todoOps.getModel(
-    {
-        text: 'Cleaning',
-        completed: true,
-        completedAt: 123
-    }
-);
+var app = express();
 
-todoModel.save().then((result) => {
-    console.log('Saved todo', result);
-}).catch((err) => {
-    console.log(err);
+app.use(bodyParser.json());
+
+app.post('/todos',(req,res)=>{
+    console.log(req.body);
+
+    todoOps.save(req.body).then( (result) =>{
+       res.send(result);
+    }).catch((err) => {
+       res.status(400).send(err);
+    });
 });
 
-// new Kitten({ name: 'Silence' });
-
-console.log(todoModel.text);
-
-//mongoose.disconnect();
-
+app.listen(3000, () => {
+    console.log('server started on 3000');
+});
