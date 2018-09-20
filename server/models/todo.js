@@ -47,8 +47,9 @@ function save(todoParms) {
 }
 
 function find() {
-    return Promise( (resolve,reject) => {
+    return new Promise( (resolve,reject) => {
         todo.find().then( (result) => {
+            console.log(result);
             resolve(result);
         }).catch( (err) => {
             reject(err);

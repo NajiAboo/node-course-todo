@@ -21,6 +21,21 @@ app.post('/todos',(req,res)=>{
     });
 });
 
+app.get('/todos',(req,res) => {
+    todoOps.find().then((result) => {
+
+        res.send({
+            todo: result
+        });
+
+    }).catch((err)=>{
+
+        res.status(400).send(err);
+    })
+    
+
+});
+
 app.listen(3000, () => {
     console.log('server started on 3000');
 });

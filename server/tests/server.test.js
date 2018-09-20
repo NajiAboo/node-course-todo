@@ -1,47 +1,42 @@
+const expect = require('expect')
 const request = require('supertest');
-
 const {app} = require('./../server.js');
 const todoOps = require('./../models/todo');
 
-// describe('Server test',() => {
+describe('Server test',() => {
 
-//      it('should create new todo', (done) => {
+    beforeEach(() =>{
+        //delete record
+    })
+     it('should create new todo', (done) => {
        
-//         var text = 'test todo';
+        var text = 'test todo';
 
-//         request(app)
-//             .post('/todos')
-//             .send({text})
-//             .set('Accept', 'application/json')
-//             .expect(200)
-//             .end( (err, res) => {
+        request(app)
+            .post('/todos')
+            .send({text})
+            .set('Accept', 'application/json')
+            .expect(200)
+            .expect((result)=>{
+                expect(result.body.text).toBe(text);
 
-//                 if (err) {
-//                     return  done(err);
-//                 }
+            })
+            .end( (err, res) => {
 
-//                 done();
+                if (err) {
+                    return  done(err);
+                }
 
-//             });
-//      });
+              todoOps.find().then((result)=>{
+                  // Need to delete record beforeeach block
+                 // expect(result.length).toBe(1);
+                 // expect(result[0].text).toBe(text);
+                  done();
+              }).catch( ( err)=> {
+                  done(err);
+              })
 
+            });
+     });
 
-
-// }); // describe
-
-
-// describe('POST /todos', ()=> {
-//     it('responds with json', (done) =>{
-//       request(app)
-//         .post('/todos')
-//         .send({text: 'john'})
-//         .expect(200)
-//         .expect( (result) =>{
-//             expect(result.body.text).toBe('1');
-//         })
-//         .end(function(err, res) {
-//           if (err) return done(err);
-//           done();
-//         }).catch(done);
-//     });
-//   });
+}); // describe
