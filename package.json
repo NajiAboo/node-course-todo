@@ -4,8 +4,12 @@
   "description": "",
   "main": "server/server.js",
   "scripts": {
+    "start": "node server/server.js",
     "test": "mocha \"./{,!(node_modules)/**/}*.test.js\" --timeout 10000 ",
     "test-watch": "nodemon --exec \"npm test\""
+  },
+  "engines": {
+    "node": "8.11.3"
   },
   "author": "Naji Aboo",
   "license": "ISC",
