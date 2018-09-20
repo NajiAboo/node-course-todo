@@ -46,9 +46,9 @@ function save(todoParms) {
     })
 }
 
-function find() {
+function find(prams) {
     return new Promise( (resolve,reject) => {
-        todo.find().then( (result) => {
+        todo.find(prams).then( (result) => {
             console.log(result);
             resolve(result);
         }).catch( (err) => {
@@ -57,9 +57,19 @@ function find() {
     });
 }
 
+function remove() {
+    return new Promise( (resolve,reject) =>{
+        todo.remove().then(() => {
+            resolve();
+        }).catch((err)=>{reject});
+    });
+}
+
 //module.exports = mongoose.model('todo',todoSchema);
 module.exports = {
     getModel,
     save,
-    find
+    find,
+    remove,
+    todo
 };
