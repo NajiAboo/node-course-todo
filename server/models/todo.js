@@ -46,8 +46,19 @@ function save(todoParms) {
     })
 }
 
+function find() {
+    return Promise( (resolve,reject) => {
+        todo.find().then( (result) => {
+            resolve(result);
+        }).catch( (err) => {
+            reject(err);
+        })
+    });
+}
+
 //module.exports = mongoose.model('todo',todoSchema);
 module.exports = {
     getModel,
-    save
+    save,
+    find
 };
