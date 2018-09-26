@@ -4,21 +4,10 @@ const request = require('supertest');
 const {ObjectID} = require('mongodb');
 const {app} = require('./../server.js');
 const todoOps = require('./../models/todo');
+const {todos, populateTodos, users, populateUsers} = require('./seed/seed');
 
-const todos = [{
-    _id : new ObjectID(),
-    text : 'First test todo'
-},{
-    _id : new ObjectID(),
-    text: 'Second test todo'
-}];
-
-beforeEach((done) =>{
-    //delete record
-    todoOps.remove().then(() => {
-        return todoOps.todo.insertMany(todos)
-    }).then(() => done());
-});
+beforeEach(populateUsers);
+beforeEach(populateTodos);
 
 describe('Server test',() => {
 
@@ -133,3 +122,27 @@ describe('todos/delete/:id',() => {
     })
 
 })
+
+describe('GET / users/me', () =>{
+
+    it('should return if authenticated', (done) => {
+        request(app)
+        .get('/users/me')
+        .set('x-auth', users[0].tokens[0].tokens )
+        .expect(200)
+        .expect((result)=>{
+            expect(result.body.user.email).toBe(users[0].email);
+        }).end(done);
+    });
+
+    it('should return 401 if not authenticated', (done)=>{
+
+        request(app)
+        .get('/users/me')
+        .expect(401)
+        .expect((result)=>{
+            expect(result.body.user).toNotExist();
+        }).end(done);
+
+    });
+});

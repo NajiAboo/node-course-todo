@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const {mongoose} = require('./db/mongoose');
 const {ObjectID} = require('mongodb');
 const _ = require('lodash');
-
+const bcrypt = require('bcryptjs');
 
 var todoOps = require('./models/todo');
 var userOps = require('./models/user');
@@ -121,6 +121,26 @@ app.get('/users/me',authenticate, (req, res) => {
     //      res.status(401).send();
     //  });
 
+});
+
+app.post('/users/login',(req,res) => {
+    var body = _.pick(req.body, ['email','password'])
+
+    var email = body.email;
+    var password = body.password;
+
+    userOps.userModel.findByCredential(email, password)
+    .then((user)=> {
+        res.send(user)
+    }).catch((err) =>{
+
+    })
+   
+   
+
+    
+     
+   
 });
 
 app.listen(port, () => {

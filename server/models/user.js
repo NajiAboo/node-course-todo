@@ -68,7 +68,6 @@ userSchema.statics.findByToken = function(token) {
         console.log(decoded);
 
     } catch(e) {
-        console.log(e);
         return new Promise((resolve, reject) => {
             reject();
         })
@@ -96,8 +95,39 @@ userSchema.statics.findByToken = function(token) {
         else{
             next();
         }
-        console.log(user);
     });
+
+    userSchema.statics.findByCredential = function(email, password) {
+        var user = this;
+        var hashedpwd;
+
+        return new Promise((resolve, reject) => 
+        {
+
+            bcrypt.genSalt(10, (err,salt) =>{
+                bcrypt.hash(password, salt, (err, hash)=>{
+                    hashedpwd = hash;
+                    console.log('hasg1', hashedpwd);
+                    user.findOne({email: email})
+                    .then((user1)=>{
+                        if(user1) {
+                           // var upUser  = _.pick(user, ['email']);
+                             resolve(user1);
+                        } else{
+                            reject();
+                        }
+                    }).catch((err)=>{
+                        reject();
+                    });
+        
+                });
+            });
+        });
+        
+    
+
+
+    }
 
 var userModel = mongoose.model('user', userSchema);
 
