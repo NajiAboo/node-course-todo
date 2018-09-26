@@ -100,6 +100,7 @@ app.post('/users',(req, res) => {
            return userModel.generateToken();
           }).then((token) => {
               console.log('Token: ', token);
+              console.log(userModel);
             return  res.header('x-auth',token).send({user: userModel});
           }).catch((err) => {
         return res.status(404).send({message: 'fail to save'+ err});
