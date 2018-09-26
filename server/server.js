@@ -3,10 +3,12 @@ const express = require('express')
 const bodyParser = require('body-parser');
 const {mongoose} = require('./db/mongoose');
 const {ObjectID} = require('mongodb');
+const _ = require('lodash');
 
 
 var todoOps = require('./models/todo');
 var userOps = require('./models/user');
+var {authenticate} = require('./middleware/authenticate');
 
 
 var app = express();
@@ -61,6 +63,62 @@ app.get('/todos/:id',(req,res)=>{
     }).catch( (err) => {
         return res.status(400).send({message: `Invalid object id ${id}`});
     })
+
+});
+
+
+app.delete('/todos/:id', (req,res) => {
+
+    // get the id 
+    var id =  req.params['id'];
+
+    // validate the id => if not send 404
+    if(!ObjectID.isValid(id)) {
+        return res.status(404).send({message: 'id is not valid'});
+    }
+
+    todoOps.todo.findByIdAndRemove(id).then((result) =>{
+
+        if (!result) {
+            return res.status(404).send({message:'No record found'});
+        }
+
+        return res.status(200).send({todo : result});
+
+    }).catch((err) =>{
+        return res.status(400).send({message: 'error occured'});
+    });
+
+}) ;
+
+app.post('/users',(req, res) => {
+    console.log(req.body);
+    var user = _.pick(req.body,['email', 'password']);
+    var userModel = userOps.getUserModel(user);
+
+     userModel.save().then(() => {
+           return userModel.generateToken();
+          }).then((token) => {
+              console.log('Token: ', token);
+            return  res.header('x-auth',token).send({user: userModel});
+          }).catch((err) => {
+        return res.status(404).send({message: 'fail to save'+ err});
+    });
+});
+
+
+
+app.get('/users/me',authenticate, (req, res) => {
+
+    res.send({user: req.user});
+    // var tokens = req.header('x-auth');
+
+    //  userOps.userModel.findByToken(tokens).then((user) => {
+    //      console.log(user);
+    //      res.send({user})
+    //  }).catch((err) => {
+    //      res.status(401).send();
+    //  });
 
 });
 

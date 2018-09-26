@@ -1,4 +1,7 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
+const jwt       = require('jsonwebtoken');
+const _ = require('lodash');
 
 const {Schema} = mongoose;
 
@@ -6,10 +9,75 @@ var userSchema = new Schema({
     email: {
         type: String,
         minlength: 1,
-        required: true
-    }
+        required: true,
+        trim: true,
+        unique: true,
+        validate: {
+            validator: function(v) {
+                return validator.isEmail;
+            },
+            message: '{VALUE} is not an email'
+        }
+    },
+    password : {
+        required: true,
+        type: String,
+        minlength : 6
+    },
+    tokens: [{
+        access: {
+            require: true,
+            type: String
+        },
+        tokens: {
+            type: String,
+            require: true
+        }
+    }]
 });
 
+userSchema.methods.generateToken = function() {
+    var user  = this;
+    var access = 'auth';
+    var tokens  = jwt.sign({_id:user._id.toHexString(), access},'123abc').toString();
+
+    user.tokens.push({access,tokens});
+
+    return user.save().then(()=>{
+        return tokens;
+    });
+
+}
+
+userSchema.methods.toJSON = function() {
+
+    var user = this;
+    var uModel = _.pick(user,['email','password']);
+    return uModel;
+}
+
+userSchema.statics.findByToken = function(token) {
+    var User = this;
+    var decoded ;
+
+    console.log('token: ', token);
+    try{
+        decoded = jwt.verify(token, '123abc');
+        console.log(decoded, "decoded");
+        console.log(decoded);
+
+    } catch(e) {
+        console.log(e);
+        return new Promise((resolve, reject) => {
+            reject();
+        })
+    }
+
+    return User.findOne({_id: decoded._id,
+             'tokens.tokens': token, 
+             'tokens.access': decoded.access }
+             );
+    }
 
 var userModel = mongoose.model('user', userSchema);
 
@@ -29,5 +97,6 @@ function save(params) {
 
 module.exports = {
     getUserModel,
-    save
+    save,
+    userModel
 }

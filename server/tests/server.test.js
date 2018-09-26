@@ -90,4 +90,46 @@ describe('GET/todos',() =>{
         .end(done);
 
     });
+});
+
+describe('todos/delete/:id',() => {
+
+    it('should delete', (done) =>{
+
+        var hexString = todos[1]._id.toHexString();
+        console.log(hexString);
+
+        request(app)
+        .delete(`/todos/${hexString}`)
+        .expect(200)
+        .expect( (result) =>{
+            expect(result.body.todo._id).toBe(hexString);
+        }).end( (err,result) =>{
+            if(err){
+                return done(err);
+            }
+
+            todoOps.todo.findById(hexString).then((result) => {
+                expect(result).toNotExist();
+                done();
+            });
+
+        });
+    });
+
+    it('should return 404', (done) => {
+
+        request(app)
+        .delete('todos/5ba3a1e595abd035fc6d9af7')
+        .expect(404)
+        .end(done);
+    });
+
+    it('should return 404 for invalid id', (done)=>{
+        request(app)
+        .delete('todos/123')
+        .expect(404)
+        .end(done);
+    })
+
 })
